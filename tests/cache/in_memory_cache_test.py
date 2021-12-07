@@ -38,7 +38,7 @@ def test__persistent_cache__count_empty():
     assert actual == 0
 
 
-def test__peristent_cache__head():
+def test__persistent_cache__head():
     # Arrange
     cache = InMemoryCache()
     cache._data["key"] = []
@@ -52,7 +52,7 @@ def test__peristent_cache__head():
     assert actual == "value_2"
 
 
-def test__peristent_cache__head_empty():
+def test__persistent_cache__head_empty():
     with pytest.raises(Exception):
         with InMemoryCache() as cache:
             actual = cache.head("key")

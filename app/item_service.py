@@ -19,12 +19,6 @@ def coroutine(func):
     return start
 
 
-def read(url: str):
-    response = requests.get(url)
-    response.raise_for_status()
-    return response
-
-
 class ItemService:
     def __init__(
         self,
@@ -44,7 +38,8 @@ class ItemService:
         """
         while True:
             url = yield
-            response = read(url)
+            response = requests.get(url)
+            response.raise_for_status()
             items = self._parser.parse_items(response.text)
             self._logger.debug(f"Found {len(items)} items")
             for item in items:
@@ -62,13 +57,14 @@ class ItemService:
     def update_item(self, item: Item) -> int:
         """Upserts the item in the cache only if it is new or has been updated."""
         item_id = item.item_id
-        try:
-            head = self._cache.head(item_id)
-        except KeyError:
-            self._cache.add(item_id, item)
-        else:
-            # Only add item if it has been updated
-            if head != item:
-                item_count = self._cache.add(item_id, item)
-        item_count = self._cache.count(item_id)
+        with self._cache:
+            try:
+                head = self._cache.head(item_id)
+            except KeyError:
+                self._cache.add(item_id, item)
+            else:
+                # Only add item if it has been updated
+                if head != item:
+                    item_count = self._cache.add(item_id, item)
+            item_count = self._cache.count(item_id)
         return item_count

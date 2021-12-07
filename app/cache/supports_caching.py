@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Protocol, TypeVar
 
 
@@ -12,4 +13,10 @@ class SupportsCaching(Protocol[CT]):
         ...
 
     def count(self, key) -> int:
+        ...
+
+    def __enter__(self) -> SupportsCaching:
+        ...
+
+    def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
         ...

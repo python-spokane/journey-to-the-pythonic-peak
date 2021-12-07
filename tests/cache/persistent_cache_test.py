@@ -6,6 +6,7 @@ from typing import Generator
 import pytest
 
 from app.cache.persistent_cache import PersistentCache
+from app.items import Item
 
 
 @contextmanager
@@ -18,6 +19,16 @@ def open_cursor() -> Generator[sqlite3.Cursor, None, None]:
     connection.close()
 
 
+@pytest.fixture(scope="module", autouse=True)
+def verify_cache_removed():
+    db_name = "test.db"
+    if os.path.exists(db_name):
+        os.remove(db_name)
+    yield
+    if os.path.exists(db_name):
+        os.remove(db_name)
+
+
 @pytest.fixture(scope="function")
 def cache():
     db_name = "test.db"
@@ -27,10 +38,11 @@ def cache():
     assert not os.path.exists(db_name)
 
 
-def test__persistent_cache__add(cache: PersistentCache):
+def test__persistent_cache__add(cache: PersistentCache[Item]):
     # Act
+    item = Item("key", "title", 1)
     with cache:
-        cache.add("key", "value")
+        cache.add(item.item_id, item)
     
     # Assert
     with open_cursor() as cursor:
@@ -41,19 +53,14 @@ def test__persistent_cache__add(cache: PersistentCache):
     assert actual[0][0] == "key"
 
 
-def test__persistent_cache__count(cache: PersistentCache):
+def test__persistent_cache__count(cache: PersistentCache[Item]):
     # Arrange
-    with open_cursor() as cursor:
-        cursor.execute(
-            "INSERT INTO items (key, value) "
-            "VALUES (?, ?)",
-            ("key", "value_1")
-        )
-        cursor.execute(
-            "INSERT INTO items (key, value) "
-            "VALUES (?, ?)",
-            ("key", "value_2")
-        )
+    item = Item("key", "value_1", 1)
+    with cache:
+        cache.add(item.item_id, item)
+    item.title = "value_2"
+    with cache:
+        cache.add(item.item_id, item)
 
     # Act
     with cache:
@@ -63,7 +70,7 @@ def test__persistent_cache__count(cache: PersistentCache):
     assert actual == 2
 
 
-def test__persistent_cache__count_empty(cache: PersistentCache):
+def test__persistent_cache__count_empty(cache: PersistentCache[Item]):
     # Act
     with cache:
         actual = cache.count("key")
@@ -72,31 +79,44 @@ def test__persistent_cache__count_empty(cache: PersistentCache):
     assert actual == 0
 
 
-def test__peristent_cache__head(cache: PersistentCache):
+def test__persistent_cache__head(cache: PersistentCache[Item]):
     # Arrange
-    with open_cursor() as cursor:
-        cursor.execute(
-            "INSERT INTO items (key, value) "
-            "VALUES (?, ?)",
-            ("key", "value_1")
-        )
-    with open_cursor() as cursor:
-        cursor.execute(
-            "INSERT INTO items (key, value) "
-            "VALUES (?, ?)",
-            ("key", "value_2")
-        )
+    item = Item("key", "value_1", 1)
+    with cache:
+        cache.add(item.item_id, item)
+    item.title = "value_2"
+    with cache:
+        cache.add(item.item_id, item)
 
     # Act
     with cache:
         actual = cache.head("key")
 
     # Assert
-    assert actual[0] == "key"
-    assert actual[1] == "value_2"
+    assert isinstance(actual, Item)
+    assert actual.item_id == "key"
+    assert actual.title == "value_2"
 
 
-def test__peristent_cache__head_empty(cache: PersistentCache):
+def test__persistent_cache__head_empty(cache: PersistentCache[Item]):
     with pytest.raises(Exception):
         with cache:
-            actual = cache.head("key")
+            cache.head("key")
+
+
+def test__persistent_cache__list(cache: PersistentCache[Item]):
+    # Arrange
+    item = Item("key", "value_1", 1)
+    with cache:
+        cache.add(item.item_id, item)
+    item.title = "value_2"
+    with cache:
+        cache.add(item.item_id, item)
+
+    # Act
+    with cache:
+        actual = list(cache.list())
+
+    # Assert
+    assert len(actual) == 2
+    assert set([item.title for item in actual]) == {"value_1", "value_2"}

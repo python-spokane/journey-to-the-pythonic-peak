@@ -7,4 +7,4 @@ class Item:
     item_id: str
     title: str
     price: int
-    image_urls: Optional[list[str]]
+    image_urls: Optional[list[str]] = None

@@ -48,6 +48,7 @@ class Parser:
         if price_match is None:
             raise ValueError(f"Could not parse result_price from text={text}")
         price = int(price_match.groups()[0])
+        price *= 100
         return price
 
     def _parse_image_urls(self, tag: bs4.element.Tag) -> list[str]:

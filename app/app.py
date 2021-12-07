@@ -5,13 +5,22 @@ from . import cli, configs
 from .cache.in_memory_cache import InMemoryCache
 from .cache.persistent_cache import PersistentCache
 from .item_service import ItemService
+from .items import Item
 from .parsers import Parser
 
 
 def main():
     cli_args = cli.parse()
 
-    if cli_args.perist:
+    if cli_args.command == "ls":
+        cache = PersistentCache[Item]()
+        print("{: >10} {: >60} {: >6} ".format("Item ID", "Title", "Price"))
+        with cache:
+            for item in cache.list():
+                print("{: >10} {: >60} {: >6} ".format(item.item_id, item.title[:60], item.price))
+        return
+
+    if cli_args.persist:
         cache = PersistentCache()
     else:
         cache = InMemoryCache()
