@@ -30,6 +30,14 @@ Joe Riddle
 # Hi, I'm Joe Riddle 👋
 
 ---
+
+Next month's topic
+
+## An _Anything but Mundane_ Intro to Machine Learning
+
+Clayton Gravatt
+
+---
 # Previous recording available soon
 https://spokanepython.com
 
@@ -38,16 +46,6 @@ https://spokanepython.com
 ---
 # Pragmatic
 dealing with things sensibly and realistically in a way that is based on practical rather than theoretical considerations.
-
----
-
-# Next month's topic
-
-## M... Machine Learning
-
-**Clayton Gravatt**
-
----
 
 ---
 # Today's Format
@@ -157,4 +155,6 @@ Showcase the improvement you and your buddy made!
 
 ---
 <!-- _class: lead -->
-# Thank you for coming! Join us next time for **machine learning**!
+Thank you for coming! Join us in January for 
+# An _Anything but Mundane_
+# Intro to Machine Learning!
