@@ -55,7 +55,6 @@ https://spokanepython.com
 - Exception handling
 - Decorators
 - Generators
-- Testing
 
 <!-- 
 Why Python: Something I didn't cover last time
@@ -255,9 +254,12 @@ def square(x: int):
     return x ** 2
 
 def log(func):
-    result = func()
-    print(result)
-    return result
+    """Simple decorator to print result"""
+    def wrapper(x: int):
+        result = func(x)
+        print(f"The result is: {result}")
+        return result
+    return wrapper
 
 square = log(square)
 ```
@@ -318,16 +320,6 @@ Decorators with arguments cont'd
 <!--
 Without generators, we would have to implement iterator logic ourselves
 -->
-
----
-# Generators
-```python
-def 
-```
-
----
-# Testing
-...
 
 ---
 # Potential future topics
