@@ -38,120 +38,302 @@ Next month's topic
 Clayton Gravatt
 
 ---
-# Previous recording available soon
+# Previous recording available now
 https://spokanepython.com
 
 [IntelliTect YouTube](https://www.youtube.com/channel/UCZSEfrUQnLLohBWDKRRSohw)
 
 ---
 # Pragmatic
-dealing with things sensibly and realistically in a way that is based on practical rather than theoretical considerations.
-
----
-# Today's Format
-- Talk / live code for ~60 minutes
-- Pair programming for ~20 minutes
-- Lightning presentations for ~15-20 minutes
+> dealing with things sensibly and realistically in a way that is based on practical rather than theoretical considerations.
 
 ---
 # Outline
-- Why Python
+- Why Python?
 - Zen of Python
+- List comprehensions
 - Exception handling
 - Decorators
 - Generators
 - Testing
-- ...
 
----
-# Live Coding Example
-Craigslist CLI tool
-- Search cars for sale
-- Find lowest priced cars
-- Save car images
-- Search multiple Craigslist regions at once
+<!-- 
+Why Python: Something I didn't cover last time
+Zen of Python: What does "Pythonic" Python really mean? Where does it come from?
+-->
 
 ---
 # Why Python?
 
-- ...
-- ...
+- Easy to read
+- Gradual typing
+- Wide ecosystem
+  - ML, AI, automation, scraping, ...
+- Mature
+- Open source
+  - Steering council
+
 
 ---
-# Craigslist CLI
-- Search cars for sale
-- Find lowest priced cars
-- Save car images
-- Search multiple Craigslist regions at once
+# Who uses Python?
+- Google
+  - "Python where we can, C++ where we must."
+  - Guido worked there.
+- Instagram
+  - "We initially chose to use Python because of its reputation for simplicity and practicality, ..."
+- Spotify, Netflix
+  - Used heavily for data analysis
 
 ---
-# Craigslist CLI
-**Search cars for sale**
+# Zen of Python
 
-```bash
-$ python -m app \
-    "https://spokane.craigslist.org/d/cars-trucks-by-owner/search/cto?query=montero"
-mitsubishi montero XlS 2002
-Montero/Pajero SR Safari roof 1998
-2002 Mitsubishi Montero Sport 2002
+[PEP20](https://www.python.org/dev/peps/pep-0020/)
+
+> Long time Pythoneer Tim Peters succinctly channels the BDFL's guiding principles for Python's design into 20 aphorisms, only 19 of which have been written down.
+
+<!-- Pull up IDLE and do this... -->
+
+---
+# Zen of Python
+```python
+>>> import this
 ```
-
----
-# Craigslist CLI
-**Find lowest priced cars**
-
-```bash
-$ python -m app --lowest \
-    "https://spokane.craigslist.org/d/cars-trucks-by-owner/search/cto?query=montero"
-2002 Mitsubishi Montero Sport is the lowest priced vehicle at $650
 ```
-
----
-# Craigslist CLI
-**Save car images**
-```bash
-$ python -m app --images --output ./out \
-    "https://spokane.craigslist.org/d/cars-trucks-by-owner/search/cto?query=montero"
-$ ls ./out
-mitsubishi-montero-XlS-2002.jpg
-Montero-Pajero-SR-Safari-roof-1998.jpg
-2002-Mitsubishi-Montero-Sport-2002.jpg
-```
-
----
-# Craigslist CLI
-**Search multiple Craigslist regions at once**
-```bash
-$ python -m app --query "montero" --locations "spokane" "seattle"
-```
-```text
-mitsubishi montero XlS 2002
-Montero/Pajero SR Safari roof 1998
-2002 Mitsubishi Montero Sport 2002
-2 rare Mitsubishi Monteros Gen 1
-2003 Mitsu Montero Sport XLS
-2002 Mitsubishi Montero Sport Mechanics Special
+Beautiful is better than ugly.
+Explicit is better than implicit.
+Simple is better than complex.
+Complex is better than complicated.
 ...
 ```
 
+<!-- Many "Pythonic" conventions come from the Zen of Python's philosophies -->
+
 ---
-# Craigslist CLI Ideas
-- Filter posts from within the last week
-- Scrape data from item details page
-- Calculate average price for vehicle
-- Create UI using `tkinter`
-- Read and parse `robots.txt`
+# List comprehensions
+
+> List comprehensions provide a more concise way to create lists in situations where map() and filter() and/or nested loops would currently be used.
+
+\- [PEP202]((https://www.python.org/dev/peps/pep-0202/))
+
+> There should be one-- and preferably only one --obvious way to do it.
+
+\- Zen of Python
+
+---
+# List comprehensions
+```python
+ages = [
+    user.age
+    for user
+    in users
+]
+```
+
+```
+>>> print ages
+[23, 56, 29]
+```
+
+---
+# List comprehensions
+```python
+cool_friend_names = [
+    friend.name
+    for user
+    in users
+    for friend
+    in user.friends
+    if friend.name != "Joseph Riddle"
+]
+```
+
+```
+>>> print(cool_friend_names)
+['Phil Spokas']
+```
+
+---
+# Dict comprehensions
+```python
+{
+    ...
+    for key, value
+    in dictionary.items() 
+}
+```
+
+```python
+{
+    user.name: user
+    for user
+    in users
+}
+```
+
+<!-- 
+1: Using dict in comprehension
+2: Creating dict from list using comprehension
+-->
+
+---
+# `map` and `filter`
+
+```python
+cool_friends_names = []
+friends_by_user = map(lambda user: user.friends, users)
+for friends in friends_by_user:
+    friend_names_for_user = map(lambda user: user.name, friends)
+    cool_friend_names_for_user = \
+        filter(lambda name: name != "Joseph Riddle", friend_names_for_user)
+    cool_friends_names.extend(cool_friend_names_for_user)
+```
+
+> Simple is better than complex.
+
+---
+
+# Exception handling
+> Errors should never pass silently.
+> Unless explicitly silenced.
+
+---
+# Exception handling
+This...
+```python
+def get_user(self, name: str) -> User:
+    return self.users_by_name[name]
+```
+
+...is often better than this...
+```python
+def get_user(self, name: str) -> Union[User, None]:
+    return self.users_by_name.get(name, None)
+```
+
+<!--
+Why is it better? What do you have to always do when you get a user from the second example?
+-->
+
+---
+# Exception handling
+Don't do this...
+```python
+try:
+    do_something()
+except ValueError:
+    pass
+```
+
+<!-- Errors should never pass silently -->
+
+---
+# Exception handling
+...or this...
+```python
+try:
+    do_something()
+except BaseException:
+    pass
+```
+
+<!--
+BaseException covers many errors you shouldn't usually handle.
+Show code example in `exception_handling_bad.py`
+-->
+
+---
+# Decorators
+[PEP318](https://www.python.org/dev/peps/pep-0318/)
+
+Syntatic sugar for wrapping functions with reusable logic
+
+---
+# Decorators
+Before decorators
+```python
+def square(x: int):
+    return x ** 2
+
+def log(func):
+    result = func()
+    print(result)
+    return result
+
+square = log(square)
+```
+```python
+>>> square(2)
+4
+```
+
+---
+# Decorators
+With decorators (syntatic sugar)
+```python
+@log
+def square(x: int):
+    return x ** 2
+```
+```python
+>>> square(2)
+4
+```
+
+<!-- don't have to declare `square` multiple time... -->
+
+---
+# Decorators
+Decorators with arguments
+```python
+def log_times(num_times: int=0):
+    def log(func):
+        def wrapper(x: int):
+            result = func(x)
+            for index in range(num_times):
+                print(f"({index}) The result is: {result}")
+            return result
+        return wrapper
+    return log
+
+@log_times(num_times=3)
+def square(x: int):
+    return x ** 2
+```
+
+---
+# Decorators
+Decorators with arguments cont'd
+```python
+>>> square(2)
+(0) The result is: 4
+(1) The result is: 4
+(2) The result is: 4
+```
+
+---
+# Generators
+[PEP255](https://www.python.org/dev/peps/pep-0255/)
+> Each time the .next() method of a generator-iterator is invoked, the code in the body of the generator-function is executed until a yield or return statement (see below) is encountered, or until the end of the body is reached.
+
+<!--
+Without generators, we would have to implement iterator logic ourselves
+-->
+
+---
+# Generators
+```python
+def 
+```
+
+---
+# Testing
+...
+
+---
+# Potential future topics
+- What's new in Python 3.10
+- Async in Python
 - ...
-
----
-# Pair Programming
-Find a fellow Pythonista and tackle an improvement for the next 20 minutes.
-</br>
-[https://code.visualstudio.com/learn/collaboration/live-share](https://code.visualstudio.com/learn/collaboration/live-share)
-
----
-# Lightning Presentations
-Showcase the improvement you and your buddy made!
 
 ---
 <!-- _class: lead -->
